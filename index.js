@@ -4,7 +4,7 @@
  * @return {string} - a new string without accents
  */
 module.exports = (str, alphabet = "abcdefghijklmnopqrstuvwxyz", locale = "en") => {
-	// map to avoid repeated processing of binary search
+	// hashmap to avoid repeated processing
 	const correspondingCharacters = {};
 	isInAlphabet = (character) => {
 		appearBefore  = () => character.localeCompare(alphabet[0], locale) < 0;
@@ -12,10 +12,10 @@ module.exports = (str, alphabet = "abcdefghijklmnopqrstuvwxyz", locale = "en") =
 		if (!character || !alphabet?.length) return false;
 		return !appearBefore() && !appearAfter();
 	}
-	removeAccentsLower = (character) => removeAccentsLowerRange(character, alphabet.split(''));
-	removeAccentsLowerRange = (character, range) => {
+	removeAccents = (character) => removeAccentsRange(character, alphabet.split(''));
+	removeAccentsRange = (character, range) => {
 		if (correspondingCharacters[character]) return correspondingCharacters[character];
-		// use binary search to get corresponding character
+		// perform binary search to map corresponding character
 		switch(range.length) {
 			case 0: return null;
 			case 1: {
@@ -29,15 +29,15 @@ module.exports = (str, alphabet = "abcdefghijklmnopqrstuvwxyz", locale = "en") =
 					correspondingCharacters[character] = range[middle];
 					return range[middle];
 				}
-				return removeAccentsLowerRange(character, characterPosition < 0 ? range.slice(0, middle) : range.slice(middle));
+				return removeAccentsRange(character, characterPosition < 0 ? range.slice(0, middle) : range.slice(middle));
 			}
 		}
 	}
-	if (!str || !str.length) return str;
+	if (!str?.length) return str;
 	return str.split('').map((character) => {
 		const lowerCharacter = character.toLowerCase();
 		if (!isInAlphabet(lowerCharacter)) return character;
-		const lowerCharacterWithoutAccents = removeAccentsLower(lowerCharacter);
+		const lowerCharacterWithoutAccents = removeAccents(lowerCharacter);
 		return character === lowerCharacter ? lowerCharacterWithoutAccents : lowerCharacterWithoutAccents.toUpperCase();
 	}).join('');
 }
